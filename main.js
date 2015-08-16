@@ -74,6 +74,10 @@
 		localStorage['notepad'] = JSON.stringify(input.value);
 		update();
 	}, false);
+	input.addEventListener('scroll', function() {
+		output.scrollTop = input.scrollTop;
+		output.scrollLeft = input.scrollLeft;
+	}, false);
 
 	container.appendChild(input);
 	container.appendChild(output);
