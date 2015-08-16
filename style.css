@@ -1,0 +1,51 @@
+body {
+	margin: 0;
+	padding: 0;
+}
+#container {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+}
+#container>* {
+	font: 14pt/1.25 sans-serif;
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: calc(100vw - 10px);
+	height: calc(100vh - 10px);
+	padding: 5px;
+	margin: 0;
+	border: 0;
+	white-space: pre-wrap;
+	overflow: auto;
+}
+#container>pre {
+	pointer-events: none;
+}
+
+textarea {
+	-webkit-text-fill-color: transparent;
+}
+textarea::-webkit-input-placeholder {
+	-webkit-text-fill-color: #000;
+}
+
+.c-camxes-error>.c-camxes-error-before {
+	color: #800;
+}
+.c-camxes-error>.c-camxes-error-after {
+	color: #f00;
+}
+.c-UI {
+	color: #099;
+}
+.c-cmene {
+	color: #606;
+}
+.c-KOhA {
+	color: #066;
+}
