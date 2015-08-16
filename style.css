@@ -34,6 +34,18 @@ textarea::-webkit-input-placeholder {
 	-webkit-text-fill-color: #000;
 }
 
+.tooltip {
+	position: absolute;
+	background: #ff8;
+	border: 1px solid #884;
+	color: #000;
+	padding: 5px;
+	font-size: 12pt;
+	line-height: 1;
+	max-width: 40em;
+	margin-top: 14pt;
+}
+
 .c-camxes-error>.c-camxes-error-before {
 	color: #800;
 }

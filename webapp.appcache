@@ -1,7 +1,10 @@
 CACHE MANIFEST
 
-# 2015-08-16:v2
+# 2015-08-16:v3
 
 camxes.js
 main.js
 style.css
+
+NETWORK:
+https://atcors.herokuapp.com/http://vrici.lojban.org:5555/*
