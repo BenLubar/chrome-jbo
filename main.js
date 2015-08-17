@@ -5,12 +5,12 @@
 	var VALIS_URL = 'http://vrici.lojban.org:5555';
 
 	var appCache = window.applicationCache;
-	if (appCache) {
-		function checkAppCache() {
-			if (appCache.status === appCache.UPDATEREADY) {
-				location.reload();
-			}
+	function checkAppCache() {
+		if (appCache.status === appCache.UPDATEREADY) {
+			location.reload();
 		}
+	}
+	if (appCache) {
 		try {
 			appCache.update();
 		} catch (ex) {
@@ -38,7 +38,7 @@
 			if (typeof x === 'string') {
 				var node = [];
 				var offset = text.indexOf(x);
-				if (offset != 0) {
+				if (offset !== 0) {
 					node.push(document.createTextNode(text.substr(0, offset)));
 				}
 				node.push(document.createTextNode(x));
