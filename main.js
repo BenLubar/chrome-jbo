@@ -79,8 +79,11 @@
 
 	if (localStorage['notepad'] !== undefined) {
 		input.value = JSON.parse(localStorage['notepad']);
-		update();
 	}
+	if (input.value.length === 0) {
+		input.value = 'coi lo sampli\n\n.i ma cmene do';
+	}
+	update();
 	input.addEventListener('input', function() {
 		localStorage['notepad'] = JSON.stringify(input.value);
 		update();
