@@ -1,9 +1,6 @@
 (function() {
 	"use strict";
 
-	var VALIS_PROXY = 'https://atcors.herokuapp.com/';
-	var VALIS_URL = 'http://vrici.lojban.org:5555';
-
 	var appCache = window.applicationCache;
 	function checkAppCache() {
 		if (appCache.status === appCache.UPDATEREADY) {
@@ -20,6 +17,27 @@
 		appCache.addEventListener('updateready', checkAppCache, false);
 	}
 
+	var dict = function(callback) {
+		dict.q.push(callback);
+	};
+	dict.q = [];
+	window.dict = function(callback) {dict(callback)};
+	function loadDict() {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', 'dict/en.xml', true);
+		xhr.overrideMimeType('text/xml; charset=utf-8');
+		xhr.onload = function() {
+			dict.q.forEach(function(callback) {
+				callback(xhr.responseXML);
+			});
+			dict = function(callback) {
+				callback(xhr.responseXML);
+			};
+		};
+		xhr.send();
+	}
+	loadDict();
+
 	var input = document.createElement('textarea');
 	var output = document.createElement('pre');
 	var container = document.createElement('div');
@@ -27,9 +45,11 @@
 	function update() {
 		var text = input.value;
 		var parsed;
+		var error;
 		try {
 			parsed = camxes.parse(text);
 		} catch (ex) {
+			error = ex;
 			parsed = ["camxes-error", [["camxes-error-before", text.substr(0, ex.offset)], ["camxes-error-after", text.substr(ex.offset)]]];
 		}
 
@@ -49,7 +69,7 @@
 			if (typeof x[0] === 'string') {
 				var el = document.createElement('span');
 				el.className = 'c-' + x[0];
-				if (x.length === 2 && typeof x[1] === 'string') {
+				if (!error && x.length === 2 && typeof x[1] === 'string') {
 					el.setAttribute('data-offset', index + text.indexOf(x[1]));
 					el.setAttribute('data-length', x[1].length);
 				}
@@ -108,69 +128,51 @@
 				if (offset <= input.selectionStart && input.selectionStart - offset <= length) {
 					var tooltip = document.createElement('span');
 					tooltip.className = 'tooltip';
-					var xhr = new XMLHttpRequest();
-					xhr.open('GET', VALIS_PROXY + VALIS_URL + '/data/valsi/' + encodeURIComponent(input.value.substr(offset, length)), true);
-					xhr.onload = function() {
-						var resp = JSON.parse(xhr.responseText);
-						if (!resp.definitions) {
-							tooltip.parentNode.removeChild(tooltip);
+					var word = input.value.substr(offset, length);
+					dict(function(d) {
+						var valsi = d.querySelector('valsi[word="' + word + '"]');
+						if (!valsi) {
+							tooltip.appendChild(document.createTextNode('undefined '));
+							tooltip.appendChild(document.createTextNode(el.className.substr(2)));
 							return;
 						}
-						var url = resp.definitions.en;
-						navigator.languages.some(function(l) {
-							if (l in resp.definitions) {
-								url = resp.definitions[l];
-								return true;
+						var definition = valsi.querySelector('definition').textContent;
+						var notes = valsi.querySelector('notes');
+						if (notes) {
+							definition += '\n\n' + notes.textContent;
+						}
+						var inMath = true;
+						definition.split(/\$/g).forEach(function(s) {
+							inMath = !inMath;
+							if (inMath) {
+								var first = true;
+								s.replace(/[\{\}]/g, '').split(/=/g).forEach(function(x) {
+									if (first) {
+										first = false;
+									} else {
+										tooltip.appendChild(document.createTextNode('='));
+									}
+									if (x.indexOf('_') !== -1) {
+										x = x.split(/_/);
+										tooltip.appendChild(document.createTextNode(x[0]));
+										var subscript = document.createElement('sub');
+										subscript.appendChild(document.createTextNode(x[1]));
+										tooltip.appendChild(subscript);
+									} else if (x.indexOf('^') !== -1) {
+										x = x.split(/\^/);
+										tooltip.appendChild(document.createTextNode(x[0]));
+										var superscript = document.createElement('sup');
+										superscript.appendChild(document.createTextNode(x[1]));
+										tooltip.appendChild(superscript);
+									} else {
+										tooltip.appendChild(document.createTextNode(x));
+									}
+								});
+							} else {
+								tooltip.appendChild(document.createTextNode(s));
 							}
-							return false;
 						});
-						if (!url) {
-							tooltip.parentNode.removeChild(tooltip);
-							return;
-						}
-						xhr = new XMLHttpRequest();
-						xhr.open('GET', VALIS_PROXY + url, true);
-						xhr.onload = function() {
-							var resp = JSON.parse(xhr.responseText);
-							var definition = resp.items[0].definition;
-							if (resp.items[0].notes !== undefined) {
-								definition += '\n\n' + resp.items[0].notes;
-							}
-							var inMath = true;
-							definition.split(/\$/g).forEach(function(s) {
-								inMath = !inMath;
-								if (inMath) {
-									var first = true;
-									s.replace(/[\{\}]/g, '').split(/=/g).forEach(function(x) {
-										if (first) {
-											first = false;
-										} else {
-											tooltip.appendChild(document.createTextNode('='));
-										}
-										if (x.indexOf('_') !== -1) {
-											x = x.split(/_/);
-											tooltip.appendChild(document.createTextNode(x[0]));
-											var subscript = document.createElement('sub');
-											subscript.appendChild(document.createTextNode(x[1]));
-											tooltip.appendChild(subscript);
-										} else if (x.indexOf('^') !== -1) {
-											x = x.split(/\^/);
-											tooltip.appendChild(document.createTextNode(x[0]));
-											var superscript = document.createElement('sup');
-											superscript.appendChild(document.createTextNode(x[1]));
-											tooltip.appendChild(superscript);
-										} else {
-											tooltip.appendChild(document.createTextNode(x));
-										}
-									});
-								} else {
-									tooltip.appendChild(document.createTextNode(s));
-								}
-							});
-						};
-						xhr.send();
-					};
-					xhr.send();
+					});
 					el.appendChild(tooltip);
 				}
 			});
