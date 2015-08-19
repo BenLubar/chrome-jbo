@@ -250,6 +250,12 @@
 						}
 					});
 				}
+
+				var bold = document.createElement('strong');
+				bold.textContent = word;
+				tooltip.appendChild(bold);
+				tooltip.appendChild(document.createTextNode(' – '));
+
 				var valsi = d.querySelector('valsi[word="' + word + '"]');
 				if (!valsi) {
 					tooltip.appendChild(document.createTextNode('undefined '));
