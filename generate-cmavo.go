@@ -40,6 +40,7 @@ func main() {
 
 	for _, s := range selmaho {
 		fmt.Print(s, " = &cmavo expr:(")
+		sort.Sort(pegSort(selmahoValsi[s]))
 		for i, v := range selmahoValsi[s] {
 			if i != 0 {
 				fmt.Print(" /")
@@ -64,4 +65,18 @@ func (s selmahoSort) Len() int      { return len(s) }
 func (s selmahoSort) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s selmahoSort) Less(i, j int) bool {
 	return strings.ToLower(yhy.Replace(s[i])) < strings.ToLower(yhy.Replace(s[j]))
+}
+
+type pegSort []string
+
+func (s pegSort) Len() int      { return len(s) }
+func (s pegSort) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s pegSort) Less(i, j int) bool {
+	if len(s[i]) > len(s[j]) {
+		return true
+	}
+	if len(s[i]) < len(s[j]) {
+		return false
+	}
+	return s[i] < s[j]
 }
