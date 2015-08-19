@@ -44795,31 +44795,7 @@ var camxes = (function(){
           result0 = null;
         }
         if (result0 !== null) {
-          pos2 = pos;
-          if (input.length > pos) {
-            result1 = input.charAt(pos);
-            pos++;
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("any character");
-            }
-          }
-          if (result1 !== null) {
-            result2 = parse_i();
-            if (result2 !== null) {
-              result1 = [result1, result2];
-            } else {
-              result1 = null;
-              pos = pos2;
-            }
-          } else {
-            result1 = null;
-            pos = pos2;
-          }
-          if (result1 === null) {
-            result1 = parse_i();
-          }
+          result1 = parse_i();
           if (result1 !== null) {
             pos2 = pos;
             reportFailures++;

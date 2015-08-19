@@ -1635,7 +1635,7 @@ GOI = &cmavo expr:( v o i h e / n o h u / p o h e / p o h u / g o i / n e / p e 
 
 GUhA = &cmavo expr:( g u h a / g u h e / g u h i / g u h o / g u h u ) &post_word {return ["GUhA", _join(expr)];}
 
-I = &cmavo expr:( . i / i ) &post_word {return ["I", _join(expr)];}
+I = &cmavo expr:( i ) &post_word {return ["I", _join(expr)];}
 
 IhAU = &cmavo expr:( i h a u / i a u ) &post_word {return ["IhAU", _join(expr)];}
 

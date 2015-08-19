@@ -29,10 +29,12 @@ func main() {
 
 		if valsi.Type == "cmavo" || valsi.Type == "experimental cmavo" {
 			s := re.FindString(valsi.Selmaho)
-			if len(selmahoValsi[s]) == 0 {
-				selmaho = append(selmaho, s)
+			if s != "" && !strings.ContainsRune(valsi.Word, '.') {
+				if len(selmahoValsi[s]) == 0 {
+					selmaho = append(selmaho, s)
+				}
+				selmahoValsi[s] = append(selmahoValsi[s], valsi.Word)
 			}
-			selmahoValsi[s] = append(selmahoValsi[s], valsi.Word)
 		}
 	}
 
