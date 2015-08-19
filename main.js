@@ -208,84 +208,104 @@
 		[].forEach.call(output.querySelectorAll('.tooltip'), function(el) {
 			el.parentNode.removeChild(el);
 		});
-		if (input.selectionStart === input.selectionEnd) {
-			[].forEach.call(output.querySelectorAll('[data-offset][data-length]'), function(el) {
-				var offset = +el.getAttribute('data-offset');
-				var length = +el.getAttribute('data-length');
-				if (offset <= input.selectionStart && input.selectionStart - offset <= length) {
-					var tooltip = document.createElement('span');
-					tooltip.className = 'tooltip';
-					var word = input.value.substr(offset, length);
-					dict(function(d, rafsi) {
-						function writeTooltip(definition) {
-							var inMath = true;
-							definition.split(/\$/g).forEach(function(s) {
-								inMath = !inMath;
-								if (inMath) {
-									var first = true;
-									s.replace(/[\{\}]/g, '').split(/=/g).forEach(function(x) {
-										if (first) {
-											first = false;
-										} else {
-											tooltip.appendChild(document.createTextNode('='));
-										}
-										if (x.indexOf('_') !== -1) {
-											x = x.split(/_/);
-											tooltip.appendChild(document.createTextNode(x[0]));
-											var subscript = document.createElement('sub');
-											subscript.appendChild(document.createTextNode(x[1]));
-											tooltip.appendChild(subscript);
-										} else if (x.indexOf('^') !== -1) {
-											x = x.split(/\^/);
-											tooltip.appendChild(document.createTextNode(x[0]));
-											var superscript = document.createElement('sup');
-											superscript.appendChild(document.createTextNode(x[1]));
-											tooltip.appendChild(superscript);
-										} else {
-											tooltip.appendChild(document.createTextNode(x));
-										}
-									});
+		var tooltip;
+		function doTooltip(el, word) {
+			if (tooltip) {
+				tooltip.appendChild(document.createElement('hr'));
+			} else {
+				tooltip = document.createElement('span');
+				tooltip.className = 'tooltip';
+			}
+			dict(function(d, rafsi) {
+				function writeTooltip(definition) {
+					var inMath = true;
+					definition.split(/\$/g).forEach(function(s) {
+						inMath = !inMath;
+						if (inMath) {
+							var first = true;
+							s.replace(/[\{\}]/g, '').split(/=/g).forEach(function(x) {
+								if (first) {
+									first = false;
 								} else {
-									tooltip.appendChild(document.createTextNode(s));
+									tooltip.appendChild(document.createTextNode('='));
+								}
+								if (x.indexOf('_') !== -1) {
+									x = x.split(/_/);
+									tooltip.appendChild(document.createTextNode(x[0]));
+									var subscript = document.createElement('sub');
+									subscript.appendChild(document.createTextNode(x[1]));
+									tooltip.appendChild(subscript);
+								} else if (x.indexOf('^') !== -1) {
+									x = x.split(/\^/);
+									tooltip.appendChild(document.createTextNode(x[0]));
+									var superscript = document.createElement('sup');
+									superscript.appendChild(document.createTextNode(x[1]));
+									tooltip.appendChild(superscript);
+								} else {
+									tooltip.appendChild(document.createTextNode(x));
 								}
 							});
-						}
-						var valsi = d.querySelector('valsi[word="' + word + '"]');
-						if (!valsi) {
-							tooltip.appendChild(document.createTextNode('undefined '));
-							tooltip.appendChild(document.createTextNode(el.className.substr(2)));
 						} else {
+							tooltip.appendChild(document.createTextNode(s));
+						}
+					});
+				}
+				var valsi = d.querySelector('valsi[word="' + word + '"]');
+				if (!valsi) {
+					tooltip.appendChild(document.createTextNode('undefined '));
+					tooltip.appendChild(document.createTextNode(el.className.substr(2)));
+				} else {
+					var definition = valsi.querySelector('definition').textContent;
+					var notes = valsi.querySelector('notes');
+					if (notes) {
+						definition += '\n\n' + notes.textContent;
+					}
+					writeTooltip(definition);
+				}
+
+				if (el.className === 'c-lujvo') {
+					splitRafsi(word).forEach(function(r) {
+						tooltip.appendChild(document.createElement('hr'));
+						if (r in rafsi) {
+							var bold = document.createElement('strong');
+							bold.textContent = rafsi[r];
+							tooltip.appendChild(bold);
+							tooltip.appendChild(document.createTextNode(' – '));
+							var valsi = d.querySelector('valsi[word="' + rafsi[r] + '"]');
 							var definition = valsi.querySelector('definition').textContent;
 							var notes = valsi.querySelector('notes');
 							if (notes) {
 								definition += '\n\n' + notes.textContent;
 							}
 							writeTooltip(definition);
-						}
-
-						if (el.className === 'c-lujvo') {
-							splitRafsi(word).forEach(function(r) {
-								tooltip.appendChild(document.createElement('hr'));
-								if (r in rafsi) {
-									var bold = document.createElement('strong');
-									bold.textContent = rafsi[r];
-									tooltip.appendChild(bold);
-									tooltip.appendChild(document.createTextNode(' – '));
-									var valsi = d.querySelector('valsi[word="' + rafsi[r] + '"]');
-									var definition = valsi.querySelector('definition').textContent;
-									var notes = valsi.querySelector('notes');
-									if (notes) {
-										definition += '\n\n' + notes.textContent;
-									}
-									writeTooltip(definition);
-								} else {
-									tooltip.appendChild(document.createTextNode('undefined rafsi: '));
-									tooltip.appendChild(document.createTextNode(r));
-								}
-							});
+						} else {
+							tooltip.appendChild(document.createTextNode('undefined rafsi: '));
+							tooltip.appendChild(document.createTextNode(r));
 						}
 					});
-					el.appendChild(tooltip);
+				}
+				el.appendChild(tooltip);
+			});
+		}
+		if (input.selectionStart === input.selectionEnd) {
+			var didBu = false;
+			[].forEach.call(output.querySelectorAll('[data-offset][data-length]'), function(el) {
+				var offset = +el.getAttribute('data-offset');
+				var length = +el.getAttribute('data-length');
+				if (offset <= input.selectionStart && input.selectionStart - offset <= length) {
+					if (!didBu) {
+						for (var parent = el; parent; parent = parent.parentNode) {
+							if (parent.className === 'c-bu_clause') {
+								var start = parent.querySelector('[data-offset][data-length]');
+								var bu = parent.querySelectorAll('.c-BU');
+								bu = bu[bu.length - 1];
+								doTooltip(parent, input.value.substring(+start.getAttribute('data-offset'), +bu.getAttribute('data-offset') + +bu.getAttribute('data-length')));
+								didBu = true;
+								break;
+							}
+						}
+					}
+					doTooltip(el, input.value.substr(offset, length));
 				}
 			});
 		}
