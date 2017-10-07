@@ -1,10 +1,10 @@
 function doGloss(info, tab) {
 	chrome.windows.create({
-		"url": "http://mw.lojban.org/extensions/ilmentufa/i/en/#sisku/" + encodeURIComponent(info.selectionText),
+		"url": "https://la-lojban.github.io/sutysisku/en/#sisku/" + encodeURIComponent(info.selectionText),
 		"focused": true,
-		"incognito": tab["incognito"],
+		"incognito": tab.incognito,
 		"type": "popup"
-	});	
+	});
 }
 
 chrome.contextMenus.create({
